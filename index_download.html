@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Matchmove &#8212; 27/02/2026 12:30</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a28; --border:#2a2a3d;
+  --accent:#7c5cfc; --accent2:#f7c948; --accent3:#3ecf8e; --danger:#ff4d6d;
+  --text:#e8e8f0; --muted:#6b6b8a;
+  --font-display:'Syne',sans-serif; --font-mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-mono);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.header{padding:28px 40px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.95);backdrop-filter:blur(12px);}
+.logo{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.logo span{color:var(--accent);}
+.header-meta{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.main{padding:32px 40px;position:relative;z-index:1;}
+.filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+.filter-group{display:flex;flex-direction:column;gap:6px;min-width:155px;}
+.filter-label{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+select,.btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer;outline:none;transition:border-color .2s;}
+select:hover,select:focus{border-color:var(--accent);}
+.btn{background:var(--accent);border-color:var(--accent);color:white;font-weight:500;align-self:flex-end;padding:9px 20px;}
+.btn:hover{opacity:.85;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:32px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 18px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s;}
+.kpi-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent-color,var(--accent));}
+.kpi-label{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.kpi-value{font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:-1px;}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.tabs{display:flex;flex-wrap:wrap;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.tab{padding:10px 18px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab:hover:not(.active){color:var(--text);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media(max-width:1000px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;}
+.chart-title{font-size:12px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
+.chart-wrap{position:relative;height:280px;}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;}
+.table-head{padding:16px 20px;border-bottom:1px solid var(--border);}
+.table-head h3{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;text-align:left;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--surface2);}
+td{padding:10px 16px;font-size:13px;border-bottom:1px solid rgba(42,42,61,0.5);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(124,92,252,0.05);}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;}
+.badge-good{background:rgba(62,207,142,0.15);color:var(--accent3);}
+.badge-warn{background:rgba(247,201,72,0.15);color:var(--accent2);}
+.badge-bad{background:rgba(255,77,109,0.15);color:var(--danger);}
+.badge-purple{background:rgba(124,92,252,0.15);color:var(--accent);}
+.alert-box{border-radius:12px;padding:22px;border:1px solid;margin-bottom:20px;}
+.alert-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.alert-item:last-child{margin-bottom:0;}
+.alert-icon{font-size:17px;flex-shrink:0;margin-top:1px;}
+.alert-text strong{display:block;font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:3px;}
+.alert-text span{font-size:12px;color:var(--muted);line-height:1.5;}
+.scatter-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.ann-card{background:rgba(255,77,109,0.06);border:1px solid rgba(255,77,109,0.2);border-radius:12px;padding:20px;margin-bottom:16px;}
+.ann-header{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--danger);margin-bottom:14px;}
+.ann-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,77,109,0.1);font-size:13px;}
+.ann-row:last-child{border:none;}
+.ann-ca{color:var(--danger);font-weight:700;}
+.ann-meta{font-size:11px;color:var(--muted);}
+.footer{padding:20px 40px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:1px;}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">Match<span>move</span> <span style="color:var(--muted);font-weight:400;font-size:15px">/ Dashboard Intelligence</span></div>
+  <div class="header-meta">G&#233;n&#233;r&#233; le 27/02/2026 12:30 &#183; Donn&#233;es auto</div>
+</header>
+<main class="main">
+
+<!-- FILTRES -->
+<div class="filters">
+  <div class="filter-group">
+    <div class="filter-label">P&#233;riode OPS</div>
+    <select id="f-period" onchange="applyFilters()">
+      <option value="all">Toutes</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Agent OPS</div>
+    <select id="f-agent-ops" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Agent Sales</div>
+    <select id="f-agent-sales" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Provider</div>
+    <select id="f-provider" onchange="applyFilters()">
+      <option value="all">Tous</option>
+    </select>
+  </div>
+  <div class="filter-group" style="justify-content:flex-end">
+    <button class="btn" onclick="resetFilters()">&#8634; R&#233;initialiser</button>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi-card" style="--accent-color:var(--accent)">
+    <div class="kpi-label">CA OPS Total</div>
+    <div class="kpi-value" id="kv-ops-ca">&#8212;</div>
+    <div class="kpi-sub" id="ks-ops-ca">&#8212;</div>
+  </div>
+  <div class="kpi-card" style="--accent-color:var(--accent3)">
+    <div class="kpi-label">Marge OPS</div>
+    <div class="kpi-value" id="kv-ops-marge">&#8212;</div>
+    <div class="kpi-sub" id="ks-ops-marge">&#8212;</div>
+  </div>
+  <div class="kpi-card" style="--accent-color:var(--accent2)">
+    <div class="kpi-label">Chantiers OPS</div>
+    <div class="kpi-value" id="kv-ops-chantiers">&#8212;</div>
+    <div class="kpi-sub">dossiers trait&#233;s</div>
+  </div>
+  <div class="kpi-card" style="--accent-color:#f97316">
+    <div class="kpi-label">CA Sales Total</div>
+    <div class="kpi-value" id="kv-sales-ca">&#8212;</div>
+    <div class="kpi-sub" id="ks-sales-ca">&#8212;</div>
+  </div>
+  <div class="kpi-card" style="--accent-color:#06b6d4">
+    <div class="kpi-label">Panier Moyen OPS</div>
+    <div class="kpi-value" id="kv-panier">&#8212;</div>
+    <div class="kpi-sub">par mois&#183;agent</div>
+  </div>
+  <div class="kpi-card" style="--accent-color:var(--danger)">
+    <div class="kpi-label">CA Annul&#233;</div>
+    <div class="kpi-value" style="color:var(--danger)" id="kv-ann">&#8212;</div>
+    <div class="kpi-sub" id="ks-ann">&#8212;</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active"  onclick="showTab('tab-ops',this)">&#128202; Rentabilit&#233; OPS</button>
+  <button class="tab"         onclick="showTab('tab-agents-ops',this)">&#128100; Agents OPS</button>
+  <button class="tab"         onclick="showTab('tab-sales',this)">&#128188; Agents Sales</button>
+  <button class="tab"         onclick="showTab('tab-providers',this)">&#127991;&#65039; Providers Sales</button>
+  <button class="tab"         onclick="showTab('tab-prestas',this)">&#128295; Prestataires OPS</button>
+  <button class="tab"         onclick="showTab('tab-annulations',this)">&#10060; Annulations</button>
+  <button class="tab"         onclick="showTab('tab-alertes',this)">&#128680; Alertes</button>
+  <button class="tab"         onclick="showTab('tab-segments',this)">&#128230; DEM vs DEB</button>
+  <button class="tab"         onclick="showTab('tab-mckinsey',this)">&#128208; D&#233;cisions</button>
+</div>
+
+<!-- OPS GLOBAL -->
+<div id="tab-ops" class="tab-panel active">
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">&#201;volution mensuelle &#8212; CA & Marge OPS</div>
+      <div class="chart-wrap"><canvas id="ch-ops-monthly"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">R&#233;partition CA par Agent OPS</div>
+      <div class="chart-wrap"><canvas id="ch-ops-pie"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Top Prestataires &#8212; CA Client vs Co&#251;t Presta</div>
+    <div class="chart-wrap" style="height:320px"><canvas id="ch-vc"></canvas></div>
+  </div>
+</div>
+
+<!-- AGENTS OPS -->
+<div id="tab-agents-ops" class="tab-panel">
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">Volume vs Marge &#8212; Agents OPS</div>
+      <div class="scatter-legend" id="scatter-legend"></div>
+      <div class="chart-wrap"><canvas id="ch-scatter"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">CA mensuel par Agent OPS</div>
+      <div class="chart-wrap"><canvas id="ch-ops-agents-line"></canvas></div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-head"><h3>Performance Agents OPS</h3></div>
+    <table>
+      <thead><tr><th>Agent</th><th>Mois actifs</th><th>CA Total</th><th>Co&#251;t Presta</th><th>Marge &#8364;</th><th>Marge %</th><th>CA moy/mois</th><th>Statut</th></tr></thead>
+      <tbody id="tb-agents-ops"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- AGENTS SALES -->
+<div id="tab-sales" class="tab-panel">
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">CA Sales par Agent &#8212; Classement g&#233;n&#233;ral</div>
+      <div class="chart-wrap"><canvas id="ch-sales-bar"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">&#201;volution mensuelle Sales &#8212; Agents actifs</div>
+      <div class="chart-wrap"><canvas id="ch-sales-line"></canvas></div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-head"><h3>Classement Agents Sales</h3></div>
+    <table>
+      <thead><tr><th>#</th><th>Agent</th><th>CA Total</th><th>Mois actifs</th><th>CA moy/mois</th><th>Statut</th></tr></thead>
+      <tbody id="tb-sales-agents"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PROVIDERS SALES -->
+<div id="tab-providers" class="tab-panel">
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">CA par Provider d'apport</div>
+      <div class="chart-wrap"><canvas id="ch-prov-ca"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Volume dossiers par Provider</div>
+      <div class="chart-wrap"><canvas id="ch-prov-vol"></canvas></div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-head"><h3>Analyse Compl&#232;te Providers Sales</h3></div>
+    <table>
+      <thead><tr><th>Provider</th><th>CA Total</th><th>Dossiers</th><th>Panier Moy.</th><th>Part du CA</th><th>Agents</th><th>Performance</th></tr></thead>
+      <tbody id="tb-providers"></tbody>
+    </table>
+  </div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-title">Panier moyen par Provider</div>
+      <div class="chart-wrap"><canvas id="ch-prov-panier"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">R&#233;partition CA &#8212; Camembert</div>
+      <div class="chart-wrap"><canvas id="ch-prov-pie"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRESTATAIRES OPS -->
+<div id="tab-segments" class="tab-panel">
+  <div class="kpi-row" id="seg-kpis"></div>
+  <div class="chart-grid">
+    <div class="chart-box chart-wide"><div class="chart-title">CA mensuel &#8212; D&#233;m&#233;nagement vs D&#233;barras & M&#233;nage</div><canvas id="segCaChart"></canvas></div>
+    <div class="chart-box chart-wide"><div class="chart-title">Marge mensuelle &#8212; D&#233;m&#233;nagement vs D&#233;barras & M&#233;nage</div><canvas id="segMargeChart"></canvas></div>
+    <div class="chart-box"><div class="chart-title">R&#233;partition CA cumul&#233;</div><canvas id="segDonutChart"></canvas></div>
+    <div class="chart-box"><div class="chart-title">Marge % compar&#233;e par mois</div><canvas id="segMargePctChart"></canvas></div>
+  </div>
+  <div class="table-container" id="seg-table"></div>
+</div>
+
+<div id="tab-prestas" class="tab-panel">
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">Volume chantiers par Prestataire</div>
+      <div class="chart-wrap"><canvas id="ch-presta-vol"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Taux de marge par Prestataire</div>
+      <div class="chart-wrap"><canvas id="ch-presta-marge"></canvas></div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-head"><h3>Analyse Prestataires OPS</h3></div>
+    <table>
+      <thead><tr><th>Prestataire</th><th>Chantiers</th><th>CA Client</th><th>Co&#251;t Total</th><th>Marge &#8364;</th><th>Marge %</th><th>Co&#251;t moy/chantier</th><th>Performance</th></tr></thead>
+      <tbody id="tb-prestas"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ANNULATIONS -->
+<div id="tab-annulations" class="tab-panel">
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:28px">
+    <div class="kpi-card" style="--accent-color:var(--danger)">
+      <div class="kpi-label">CA Perdu Sales</div>
+      <div class="kpi-value" style="color:var(--danger)" id="ann-sales-total">&#8212;</div>
+      <div class="kpi-sub" id="ann-sales-count">&#8212;</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:var(--danger)">
+      <div class="kpi-label">CA Perdu OPS</div>
+      <div class="kpi-value" style="color:var(--danger)" id="ann-ops-total">&#8212;</div>
+      <div class="kpi-sub" id="ann-ops-count">&#8212;</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:var(--accent2)">
+      <div class="kpi-label">Total Perdu</div>
+      <div class="kpi-value" style="color:var(--accent2)" id="ann-total">&#8212;</div>
+      <div class="kpi-sub">CA annul&#233; cumul&#233;</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:var(--muted)">
+      <div class="kpi-label">Taux d&#39;annulation</div>
+      <div class="kpi-value" style="font-size:22px;color:var(--accent2)" id="ann-rate">&#8212;</div>
+      <div class="kpi-sub">vs CA Sales total</div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="ann-card">
+      <div class="ann-header">&#10060; Annulations Sales</div>
+      <div id="ann-sales-list"></div>
+    </div>
+    <div>
+      <div class="ann-card" style="margin-bottom:16px">
+        <div class="ann-header" style="color:var(--accent2)">&#9888;&#65039; Annulations OPS</div>
+        <div id="ann-ops-list"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Annulations Sales &#8212; Par Provider</div>
+        <div class="chart-wrap" style="height:220px"><canvas id="ch-ann-prov"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="alert-box" style="background:rgba(255,77,109,0.06);border-color:rgba(255,77,109,0.25)">
+    <div id="ann-analysis"></div>
+  </div>
+</div>
+
+<!-- ALERTES -->
+<div id="tab-alertes" class="tab-panel">
+  <div id="alertes-container"></div>
+</div>
+
+<!-- MCKINSEY DECISIONS -->
+<div id="tab-mckinsey" class="tab-panel">
+  <div id="mckinsey-container"></div>
+</div>
+
+</main>
+<footer class="footer">
+  Dashboard Matchmove &#183; G&#233;n&#233;r&#233; automatiquement le 27/02/2026 12:30 &#183; Script v3
+</footer>
+
+<script>
+Chart.defaults.color='#6b6b8a';
+Chart.defaults.borderColor='#2a2a3d';
+Chart.defaults.font.family="'DM Mono',monospace";
+
+const OPS_MONTHLY   = {"F&#233;v 25": {"MEHDI": {"ca": 21332.72, "marge": 5053.7874}, "IMED": {"ca": 6166.98, "marge": 1366.49}, "MARWA D&#201;BARRAS": {"ca": 10072.17, "marge": 3782.17}}, "Mar 25": {"MEHDI": {"ca": 13651.66, "marge": 3236.6099999999997}, "IMED": {"ca": 16645.15, "marge": 3387.8999999999996}, "MARWA D&#201;BARRAS": {"ca": 7238.25, "marge": 2608.25}}, "Avr 25": {"MEHDI": {"ca": 31097.339999999997, "marge": 7658.27}, "IMED": {"ca": 17749.81, "marge": 4328.14}, "MARWA D&#201;BARRAS": {"ca": 16904.67, "marge": 6124.67}}, "Mai 25": {"MEHDI": {"ca": 44081.670000000006, "marge": 16289.4574}, "IMED": {"ca": 32477.46, "marge": 8582.710000000001}, "MARWA D&#201;BARRAS": {"ca": 16849.17, "marge": 6589.17}}, "Juil 25": {"MEHDI": {"ca": 37854.15, "marge": 10095.13}, "IMED": {"ca": 9650.33, "marge": 2748.08}, "MARWA D&#201;BARRAS": {"ca": 19561.67, "marge": 7901.67}}, "Ao&#251;t 25": {"IMED": {"ca": 28261.489999999998, "marge": 8231.08}, "MARWA D&#201;BARRAS": {"ca": 7998.83, "marge": 3108.83}}, "Oct 25": {"MEHDI": {"ca": 27160.010000000002, "marge": 7494.9310000000005}, "IMED": {"ca": 20413.100000000002, "marge": 6384.66}, "MARWA D&#201;BARRAS": {"ca": 14948.53, "marge": 5298.53}}, "Juin 25": {"MEHDI": {"ca": 35575.82, "marge": 10781.37}, "IMED": {"ca": 38805.52, "marge": 10743.62}, "MARWA D&#201;BARRAS": {"ca": 18136.510000000002, "marge": 7706.51}}, "Nov 25": {"MEHDI": {"ca": 15346.16, "marge": 4000.0699999999997}, "IMED": {"ca": 13833.31, "marge": 4190.8099999999995}, "MARWA D&#201;BARRAS": {"ca": 11396.66, "marge": 4486.66}}, "D&#233;c 25": {"MEHDI": {"ca": 15236.68, "marge": 4330.751}, "IMED": {"ca": 27604.15, "marge": 8462.5}, "MARWA D&#201;BARRAS": {"ca": 13152.17, "marge": 4982.17}}, "Sep 25": {"MEHDI": {"ca": 18148.29, "marge": 4732.32}, "IMED": {"ca": 29551.330000000005, "marge": 8568.73}, "MARWA D&#201;BARRAS": {"ca": 10945.66, "marge": 4315.66}}, "Jan 26": {"AMENI": {"ca": 2695.83, "marge": 808.75}, "IMED": {"ca": 16783.33, "marge": 5201.67}, "MEHDI": {"ca": 23422.5, "marge": 8025.469999999999}}, "F&#233;v 26": {"AMENI": {"ca": 6137.0, "marge": 1939.5000000000002}, "IMED": {"ca": 4533.33, "marge": 1763.1}, "MEHDI": {"ca": 19978.83, "marge": 7214.68}}};
+const SALES_MONTHLY = {"Mai 24": {"HIND": 10594.0, "IMED": 2908.27}, "Juin 24": {"HIND": 12782.497, "IMED": 8416.67}, "Juil 24": {"HIND": 23775.0}, "Ao&#251;t 24": {"HIND": 3483.33}, "Sep 24": {"HIND": 14690.01}, "Jan 25": {"ASHWAK": 20686.809999999998, "HIND": 13313.4}, "Nov 24": {"MARWA": 1766.67}, "D&#233;c 24": {"ASHWAK": 15034.36}, "F&#233;v 25": {"ASHWAK": 33573.51, "SANNA": 2708.33, "MARWA H": 3225.0}, "Mar 25": {"ASHWAK": 30632.59999999999, "SANNA": 2141.0, "MARWA H": 5847.38}, "Avr 25": {"ALEXIS": 20422.32, "HIND": 30121.149999999994, "MARWA H": 15208.35}, "Oct 24": {"HIND": 6006.67, "OUMAYMA": 3265.0}, "Mai 25": {"ASHWAK": 35321.68, "HIND": 26742.5, "MARWA": 31344.120000000003}, "Juin 25": {"ASHWAK": 38330.159999999996, "HIND": 54437.689999999995}, "Juil 25": {"ASHWAK": 32491.48, "HIND": 34574.17}, "Sep 25": {"HIND": 40573.479999999996}, "Ao&#251;t 25": {"ASHWAK": 29229.989999999998, "HIND": 40378.310000000005}, "Oct 25": {"ASHWAK": 30711.67, "HIND": 32801.729999999996}, "Nov 25": {"HIND": 17162.469999999998}, "D&#233;c 25": {"ASHWAK": 28949.999999999993, "HIND": 26913.0}, "Jan 26": {"ASHWAK": 17241.670000000002, "NADIA": 25613.04}, "F&#233;v 26": {"ASHWAK": 7804.68, "NADIA": 24902.820000000007}};
+const PROVIDERS     = [{"name": "Officiel du D&#233;m.", "ca": 288385.12, "count": 221, "agents": ["MARWA", "HIND", "ALEXIS", "ASHWAK", "NADIA"]}, {"name": "Movinga", "ca": 155803.09, "count": 128, "agents": ["SANNA", "HIND", "ALEXIS", "ASHWAK", "NADIA", "MARWA H"]}, {"name": "Autre", "ca": 134622.22, "count": 91, "agents": ["SANNA", "MARWA", "HIND", "IMED", "OUMAYMA", "ASHWAK", "NADIA", "MARWA H"]}, {"name": "Matchmove Direct", "ca": 120865.1, "count": 156, "agents": ["HIND", "IMED", "ALEXIS", "OUMAYMA", "ASHWAK", "NADIA"]}, {"name": "Super D&#233;barras", "ca": 46404.85, "count": 69, "agents": ["HIND", "NADIA", "MARWA H", "ASHWAK"]}, {"name": "Agence Immo Part.", "ca": 22048.33, "count": 12, "agents": ["HIND", "IMED", "ASHWAK"]}, {"name": "Matchmove ADS", "ca": 21480.0, "count": 12, "agents": ["NADIA", "ASHWAK"]}, {"name": "Allo D&#233;m.", "ca": 13398.34, "count": 11, "agents": ["HIND", "ASHWAK"]}, {"name": "LAD", "ca": 13195.81, "count": 17, "agents": ["SANNA", "MARWA H", "ASHWAK"]}, {"name": "Maison D&#233;barras", "ca": 11960.31, "count": 9, "agents": ["HIND", "ASHWAK"]}, {"name": "Myjugaad", "ca": 9137.49, "count": 6, "agents": ["NADIA", "ASHWAK"]}, {"name": "Mes Alloc", "ca": 8329.99, "count": 6, "agents": ["HIND", "ASHWAK"]}, {"name": "Bon D&#233;barras", "ca": 7191.67, "count": 2, "agents": ["HIND", "OUMAYMA"]}, {"name": "Matchmove D&#233;m&#233;nagement", "ca": 3200.0, "count": 2, "agents": ["NADIA", "ASHWAK"]}, {"name": "Matchmove SEO", "ca": 104.67, "count": 1, "agents": ["ASHWAK"]}];
+const PRESTAS       = [{"name": "Autre", "ca": 341546.06999999995, "cost": 234872.8225999999, "count": 288}, {"name": "Yanis KBR", "ca": 52157.31, "cost": 35584.40000000001, "count": 69}, {"name": "Smail Mezahim", "ca": 42867.57, "cost": 27640.82, "count": 58}, {"name": "Andrey Gan", "ca": 52143.85, "cost": 35975.65, "count": 58}, {"name": "SM DEM", "ca": 53921.96000000001, "cost": 33368.16160000001, "count": 55}, {"name": "Les Mastodontes", "ca": 58240.849999999984, "cost": 42957.239, "count": 32}, {"name": "Amini Transport", "ca": 29327.67, "cost": 20618.21, "count": 24}, {"name": "Proben", "ca": 29325.0, "cost": 22774.08, "count": 20}, {"name": "Mohamed Mouffok", "ca": 26913.33, "cost": 19548.33, "count": 19}, {"name": "Milan", "ca": 11966.65, "cost": 8601.32, "count": 12}, {"name": "IWI Transports", "ca": 11474.98, "cost": 8009.15, "count": 10}, {"name": "Chawki Abidi", "ca": 4993.0, "cost": 3926.34, "count": 3}, {"name": "LBG D&#233;m.", "ca": 1716.67, "cost": 1321.84, "count": 2}, {"name": "Ananas D&#233;m.", "ca": 1553.33, "cost": 1140.0, "count": 2}, {"name": "Alteka", "ca": 3250.0, "cost": 2535.0, "count": 1}];
+const ANN_SALES     = [{"month": "F&#233;v 26", "client": "Pascal Martin", "ca": 5326.5, "provider": "Matchmove ADS", "agent": "HIND"}, {"month": "Sep 25", "client": "deborah Miller", "ca": 5216.67, "provider": "Movinga", "agent": "Marwa"}, {"month": "Mai 25", "client": "Alexis Kouzmine-Karava&#239;eff", "ca": 3958.33, "provider": "Movinga", "agent": "?"}, {"month": "Mai 25", "client": "Franck Plisson", "ca": 3158.33, "provider": "Movinga", "agent": "?"}, {"month": "F&#233;v 26", "client": "Julien Dohet", "ca": 2083.33, "provider": "Myjugaad", "agent": "Molka"}, {"month": "F&#233;v 26", "client": "Fabrice PHILIPPE", "ca": 2041.67, "provider": "Officiel du D&#233;m.", "agent": "ASHWAK"}, {"month": "Mai 25", "client": "Marc Olive", "ca": 1875.0, "provider": "Movinga", "agent": "?"}, {"month": "Nov 25", "client": "Alice Galliou", "ca": 1841.67, "provider": "Officiel du D&#233;m.", "agent": "ASHWAK"}, {"month": "F&#233;v 26", "client": "Alice Galliou", "ca": 1841.67, "provider": "Officiel du D&#233;m.", "agent": "ASHWAK"}, {"month": "Mar 25", "client": "Sonia Scifo", "ca": 1500.0, "provider": "Autre", "agent": "Marwa H"}, {"month": "Mai 25", "client": "Fabien Bardet", "ca": 1325.0, "provider": "Matchmove Direct", "agent": "?"}, {"month": "Oct 25", "client": "Jamin", "ca": 1070.83, "provider": "Officiel du D&#233;m.", "agent": "MARWA"}, {"month": "Mai 25", "client": "Thomas Mouly", "ca": 1041.67, "provider": "Movinga", "agent": "?"}, {"month": "Mar 25", "client": "Gis&#232;le DUVAL", "ca": 900.0, "provider": "Super D&#233;barras", "agent": "Hind"}, {"month": "Mai 25", "client": "Emmanuelle DENIS", "ca": 900.0, "provider": "LAD", "agent": "?"}, {"month": "Mar 25", "client": "Florence Lafleure", "ca": 858.0, "provider": "Super D&#233;barras", "agent": "Hind"}, {"month": "Mai 25", "client": "Denys Oleksiv", "ca": 766.67, "provider": "Movinga", "agent": "?"}, {"month": "Mai 25", "client": "In&#232;s Delambilly", "ca": 658.33, "provider": "Movinga", "agent": "?"}, {"month": "Mai 25", "client": "Elise Lardy", "ca": 457.5, "provider": "Matchmove Direct", "agent": "?"}, {"month": "Oct 25", "client": "Taina Clacer", "ca": 333.33, "provider": "Movinga", "agent": "Nadia"}, {"month": "Mar 25", "client": "Julius Mason", "ca": 314.38, "provider": "Movinga", "agent": "Ashwak"}, {"month": "Jan 26", "client": "Yannik Brun", "ca": 287.5, "provider": "Matchmove Direct", "agent": "Nadia"}, {"month": "Mai 25", "client": "COSSANTELI GILLES", "ca": 241.67, "provider": "Movinga", "agent": "?"}, {"month": "Nov 25", "client": "Aurelien Gras", "ca": 225.0, "provider": "Movinga", "agent": "ashwak"}];
+const ANN_OPS       = [{"month": "F&#233;v 26", "client": "Julien DOHET", "ca": 2083.33, "agent": "MARWA"}, {"month": "F&#233;v 26", "client": "Fabrice PHILIPPE", "ca": 2041.67, "agent": "IMED"}, {"month": "Nov 25", "client": "Alice Galliou", "ca": 1841.67, "agent": "IMED"}, {"month": "Oct 25", "client": "Jamin", "ca": 1070.83, "agent": "IMED"}, {"month": "Oct 25", "client": "Taina Clacer", "ca": 333.33, "agent": "IMED"}, {"month": "Nov 25", "client": "Aurelien Gras", "ca": 225.0, "agent": "MARWA"}];
+const KPI_GLOBAL    = {"Mai 24": {"ca_dem": 13502.27, "marge_dem": 2663.21, "ca_deb": 0.0, "marge_deb": 0.0, "n": 10}, "Juin 24": {"ca_dem": 20899.17, "marge_dem": 3854.16, "ca_deb": 3391.67, "marge_deb": 1683.34, "n": 12}, "Juil 24": {"ca_dem": 23475.0, "marge_dem": 5095.0, "ca_deb": 1960.0, "marge_deb": 1060.0, "n": 8}, "Ao&#251;t 24": {"ca_dem": 3183.33, "marge_dem": 636.67, "ca_deb": 0.0, "marge_deb": 0.0, "n": 2}, "Sep 24": {"ca_dem": 14690.01, "marge_dem": 3083.69, "ca_deb": 541.67, "marge_deb": 141.67, "n": 9}, "Oct 24": {"ca_dem": 9281.67, "marge_dem": 1512.36, "ca_deb": 3706.26, "marge_deb": 1930.0, "n": 9}, "Nov 24": {"ca_dem": 24804.67, "marge_dem": 5324.25, "ca_deb": 0.0, "marge_deb": 0.0, "n": 13}, "D&#233;c 24": {"ca_dem": 15104.36, "marge_dem": 3524.57, "ca_deb": 4540.33, "marge_deb": 1910.35, "n": 18}, "Jan 25": {"ca_dem": 24353.0, "marge_dem": 5360.0, "ca_deb": 13313.0, "marge_deb": 5643.0, "n": 43}, "F&#233;v 25": {"ca_dem": 28750.36, "marge_dem": 6802.44, "ca_deb": 10492.17, "marge_deb": 4262.17, "n": 46}, "Mar 25": {"ca_dem": 30297.0, "marge_dem": 6665.34, "ca_deb": 6835.0, "marge_deb": 2491.3575, "n": 34}, "Avr 25": {"ca_dem": 50347.0, "marge_dem": 13487.0, "ca_deb": 15404.0, "marge_deb": 6124.0, "n": 44}, "Mai 25": {"ca_dem": 76559.0, "marge_dem": 24872.0, "ca_deb": 16849.0, "marge_deb": 6589.6439, "n": 64}, "Juin 25": {"ca_dem": 74631.34, "marge_dem": 20448.98716, "ca_deb": 18136.51, "marge_deb": 7325.336389, "n": 81}, "Juil 25": {"ca_dem": 47503.98, "marge_dem": 12840.32579, "ca_deb": 19561.67, "marge_deb": 7900.958513, "n": 68}, "Ao&#251;t 25": {"ca_dem": 61609.47, "marge_dem": 17280.0, "ca_deb": 7998.83, "marge_deb": 4890.0, "n": 53}, "Sep 25": {"ca_dem": 47706.0, "marge_dem": 13191.0, "ca_deb": 10900.0, "marge_deb": 4270.0, "n": 58}, "Oct 25": {"ca_dem": 47573.0, "marge_dem": 13843.743, "ca_deb": 15940.0, "marge_deb": 5706.52, "n": 62}, "Nov 25": {"ca_dem": 29392.47, "marge_dem": 8817.741, "ca_deb": 11182.33, "marge_deb": 4179.954954, "n": 48}, "D&#233;c 25": {"ca_dem": 42474.0, "marge_dem": 12669.9942, "ca_deb": 13352.0, "marge_deb": 5204.6096, "n": 50}, "Jan 26": {"ca_dem": 25660.0, "marge_dem": 8222.23, "ca_deb": 17241.66, "marge_deb": 5813.66, "n": 34}};
+const KPI_MONTHS    = ["Mai 24", "Juin 24", "Juil 24", "Ao&#251;t 24", "Sep 24", "Oct 24", "Nov 24", "D&#233;c 24", "Jan 25", "F&#233;v 25", "Mar 25", "Avr 25", "Mai 25", "Juin 25", "Juil 25", "Ao&#251;t 25", "Sep 25", "Oct 25", "Nov 25", "D&#233;c 25", "Jan 26"];
+const OPS_MONTHS    = ["F&#233;v 25", "Mar 25", "Avr 25", "Mai 25", "Juin 25", "Juil 25", "Ao&#251;t 25", "Sep 25", "Oct 25", "Nov 25", "D&#233;c 25", "Jan 26", "F&#233;v 26"];
+const SALES_MONTHS  = ["Mai 24", "Juin 24", "Juil 24", "Ao&#251;t 24", "Sep 24", "Oct 24", "Nov 24", "D&#233;c 24", "Jan 25", "F&#233;v 25", "Mar 25", "Avr 25", "Mai 25", "Juin 25", "Juil 25", "Ao&#251;t 25", "Sep 25", "Oct 25", "Nov 25", "D&#233;c 25", "Jan 26", "F&#233;v 26"];
+
+const PALETTE = ['rgba(124,92,252,0.8)','rgba(62,207,142,0.8)','rgba(247,201,72,0.8)',
+  'rgba(255,77,109,0.8)','rgba(59,130,246,0.8)','rgba(251,146,60,0.8)',
+  'rgba(217,70,239,0.8)','rgba(20,184,166,0.8)','rgba(234,179,8,0.8)',
+  'rgba(239,68,68,0.8)','rgba(16,185,129,0.8)','rgba(99,102,241,0.8)'];
+
+const fmt = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const fmtFull = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+let charts={};
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+// &#9472;&#9472; FILTRES &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function populateFilters() {
+  const periods = document.getElementById('f-period');
+  OPS_MONTHS.forEach(m => { const o=document.createElement('option'); o.value=o.textContent=m; periods.append(o); });
+  const opsAgents = [...new Set(OPS_MONTHS.flatMap(m=>Object.keys(OPS_MONTHLY[m]||{})))];
+  const fao=document.getElementById('f-agent-ops');
+  opsAgents.forEach(a=>{ const o=document.createElement('option'); o.value=o.textContent=a; fao.append(o); });
+  const salesAgents=[...new Set(SALES_MONTHS.flatMap(m=>Object.keys(SALES_MONTHLY[m]||{})))];
+  const fas=document.getElementById('f-agent-sales');
+  salesAgents.forEach(a=>{ const o=document.createElement('option'); o.value=o.textContent=a; fas.append(o); });
+  const fp=document.getElementById('f-provider');
+  PROVIDERS.forEach(p=>{ const o=document.createElement('option'); o.value=o.textContent=p.name; fp.append(o); });
+}
+
+function getFilteredOps() {
+  const period=document.getElementById('f-period').value;
+  const agent=document.getElementById('f-agent-ops').value;
+  let result=[]; let months=period==='all'?OPS_MONTHS:[period];
+  months.forEach(m=>{ if(!OPS_MONTHLY[m]) return;
+    Object.entries(OPS_MONTHLY[m]).forEach(([ag,d])=>{
+      if(agent!=='all'&&ag!==agent) return;
+      result.push({month:m,agent:ag,ca:d.ca,marge:d.marge});
+    });
+  });
+  return result;
+}
+
+function getFilteredSales() {
+  const agent=document.getElementById('f-agent-sales').value;
+  const prov=document.getElementById('f-provider').value;
+  let result=[];
+  SALES_MONTHS.forEach(m=>{ if(!SALES_MONTHLY[m]) return;
+    Object.entries(SALES_MONTHLY[m]).forEach(([ag,ca])=>{
+      if(agent!=='all'&&ag!==agent) return;
+      result.push({month:m,agent:ag,ca});
+    });
+  });
+  return result;
+}
+
+function resetFilters() {
+  ['f-period','f-agent-ops','f-agent-sales','f-provider'].forEach(id=>document.getElementById(id).value='all');
+  applyFilters();
+}
+
+function applyFilters() {
+  const ops=getFilteredOps(); const sales=getFilteredSales();
+  updateKPIs(ops,sales);
+  renderOpsMonthly(ops); renderOpsPie(ops); renderVC();
+  renderScatter(ops); renderOpsAgentsLine(ops); renderTableAgentsOps(ops);
+  renderSalesBar(sales); renderSalesLine(sales); renderTableSales(sales);
+  renderProviders(); renderTableProviders();
+  renderPrestas(); renderTablePrestas();
+  renderAnnulations();
+  renderAlertes(ops,sales);
+  renderMcKinsey(ops,sales);
+  renderSegments();
+}
+
+// &#9472;&#9472; KPIs &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function updateKPIs(ops,sales) {
+  const tCA=ops.reduce((s,r)=>s+r.ca,0);
+  const tM=ops.reduce((s,r)=>s+r.marge,0);
+  const tS=sales.reduce((s,r)=>s+r.ca,0);
+  const mp=tCA>0?(tM/tCA*100).toFixed(1):0;
+  const annTotal=(ANN_SALES.reduce((s,a)=>s+a.ca,0)+ANN_OPS.reduce((s,a)=>s+a.ca,0));
+  document.getElementById('kv-ops-ca').textContent=fmt(tCA);
+  document.getElementById('ks-ops-ca').textContent='Co&#251;t: '+fmt(tCA-tM);
+  document.getElementById('kv-ops-marge').textContent=mp+'%';
+  document.getElementById('ks-ops-marge').textContent=fmtFull(tM)+' g&#233;n&#233;r&#233;s';
+  document.getElementById('kv-ops-chantiers').textContent=ops.length||'&#8212;';
+  document.getElementById('kv-sales-ca').textContent=fmt(tS);
+  document.getElementById('ks-sales-ca').textContent=sales.length+' enregistrements';
+  document.getElementById('kv-panier').textContent=ops.length>0?fmt(tCA/ops.length):'&#8212;';
+  document.getElementById('kv-ann').textContent=fmt(annTotal);
+  document.getElementById('ks-ann').textContent=(ANN_SALES.length+ANN_OPS.length)+' dossiers';
+}
+
+// &#9472;&#9472; OPS CHARTS &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderOpsMonthly(ops) {
+  const m={};
+  ops.forEach(r=>{ if(!m[r.month]) m[r.month]={ca:0,marge:0}; m[r.month].ca+=r.ca; m[r.month].marge+=r.marge; });
+  const labels=OPS_MONTHS.filter(x=>m[x]);
+  dc('opsM'); charts['opsM']=new Chart(document.getElementById('ch-ops-monthly'),{
+    type:'bar', data:{ labels, datasets:[
+      {label:'CA Client',data:labels.map(l=>m[l].ca),backgroundColor:'rgba(124,92,252,0.7)',borderRadius:4},
+      {label:'Marge',data:labels.map(l=>m[l].marge),backgroundColor:'rgba(62,207,142,0.7)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+}
+
+function renderOpsPie(ops) {
+  const ag={};
+  ops.forEach(r=>ag[r.agent]=(ag[r.agent]||0)+r.ca);
+  const entries=Object.entries(ag).sort((a,b)=>b[1]-a[1]);
+  dc('opsPie'); charts['opsPie']=new Chart(document.getElementById('ch-ops-pie'),{
+    type:'doughnut', data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:PALETTE,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11}}}}}
+  });
+}
+
+function renderVC() {
+  const top=PRESTAS.slice(0,10);
+  dc('vc'); charts['vc']=new Chart(document.getElementById('ch-vc'),{
+    type:'bar', data:{labels:top.map(p=>p.name),datasets:[
+      {label:'CA Client',data:top.map(p=>p.ca),backgroundColor:'rgba(124,92,252,0.7)',borderRadius:4},
+      {label:'Co&#251;t Presta',data:top.map(p=>p.cost),backgroundColor:'rgba(255,77,109,0.7)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top'}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
+  });
+}
+
+function renderScatter(ops) {
+  const agents={};
+  ops.forEach(r=>{ if(!agents[r.agent]) agents[r.agent]={n:0,ca:0,m:0}; agents[r.agent].n++; agents[r.agent].ca+=r.ca; agents[r.agent].m+=r.marge; });
+  const datasets=Object.entries(agents).map(([name,d],i)=>({
+    label:name, data:[{x:d.n,y:d.ca>0?d.m/d.ca*100:0,r:Math.min(Math.sqrt(d.ca/600),26)+5}],
+    backgroundColor:PALETTE[i%PALETTE.length], borderWidth:0
+  }));
+  document.getElementById('scatter-legend').innerHTML=Object.keys(agents).map((n,i)=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${PALETTE[i%PALETTE.length]}"></div>${n}</div>`).join('');
+  dc('scatter'); charts['scatter']=new Chart(document.getElementById('ch-scatter'),{
+    type:'bubble', data:{datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{title:{display:true,text:'Nb enregistrements'}},y:{title:{display:true,text:'Marge %'},ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+function renderOpsAgentsLine(ops) {
+  const m={};
+  ops.forEach(r=>{ if(!m[r.month]) m[r.month]=Object.create(null); m[r.month][r.agent]=(m[r.month][r.agent]||0)+r.ca; });
+  const labels=OPS_MONTHS.filter(x=>m[x]);
+  const agents=[...new Set(ops.map(r=>r.agent))];
+  const agColors={'MEHDI':'rgba(124,92,252,1)','IMED':'rgba(62,207,142,1)','MARWA D&#201;BARRAS':'rgba(247,201,72,1)'};
+  dc('opsAgLine'); charts['opsAgLine']=new Chart(document.getElementById('ch-ops-agents-line'),{
+    type:'line', data:{labels,datasets:agents.map((ag,i)=>({
+      label:ag, data:labels.map(l=>m[l][ag]||0),
+      borderColor:agColors[ag]||PALETTE[i], backgroundColor:(agColors[ag]||PALETTE[i]).replace('1)','0.1)'),
+      tension:0.3, pointRadius:3, fill:false
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+}
+
+function renderTableAgentsOps(ops) {
+  const agents={};
+  ops.forEach(r=>{ if(!agents[r.agent]) agents[r.agent]={months:new Set(),ca:0,marge:0};
+    agents[r.agent].months.add(r.month); agents[r.agent].ca+=r.ca; agents[r.agent].marge+=r.marge; });
+  document.getElementById('tb-agents-ops').innerHTML=Object.entries(agents).sort((a,b)=>b[1].ca-a[1].ca).map(([n,d])=>{
+    const mp=d.ca>0?d.marge/d.ca*100:0; const cost=d.ca-d.marge;
+    const b=mp>=35?'badge-good':mp>=25?'badge-warn':'badge-bad';
+    const s=mp>=35?'&#127775; Excellent':mp>=25?'&#9888;&#65039; Correct':'&#128308; Faible';
+    const months=d.months.size;
+    return `<tr><td><strong>${n}</strong></td><td>${months}</td><td>${fmtFull(d.ca)}</td><td>${fmtFull(cost)}</td><td>${fmtFull(d.marge)}</td><td><span class="badge ${b}">${mp.toFixed(1)}%</span></td><td>${fmtFull(d.ca/months)}</td><td>${s}</td></tr>`;
+  }).join('');
+}
+
+// &#9472;&#9472; SALES CHARTS &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderSalesBar(sales) {
+  const ag={};
+  sales.forEach(r=>ag[r.agent]=(ag[r.agent]||0)+r.ca);
+  const entries=Object.entries(ag).sort((a,b)=>b[1]-a[1]);
+  dc('salesBar'); charts['salesBar']=new Chart(document.getElementById('ch-sales-bar'),{
+    type:'bar', data:{labels:entries.map(e=>e[0]),datasets:[{label:'CA',data:entries.map(e=>e[1]),backgroundColor:PALETTE,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}
+  });
+}
+
+function renderSalesLine(sales) {
+  const m={};
+  sales.forEach(r=>{ if(!m[r.month]) m[r.month]={}; m[r.month][r.agent]=(m[r.month][r.agent]||0)+r.ca; });
+  const labels=SALES_MONTHS.filter(x=>m[x]);
+  const agents=[...new Set(sales.map(r=>r.agent))].slice(0,6);
+  dc('salesLine'); charts['salesLine']=new Chart(document.getElementById('ch-sales-line'),{
+    type:'line', data:{labels,datasets:agents.map((ag,i)=>({
+      label:ag, data:labels.map(l=>m[l]?.[ag]||0),
+      borderColor:PALETTE[i].replace('0.8','1'), backgroundColor:PALETTE[i].replace('0.8','0.1'),
+      tension:0.3, pointRadius:2, fill:false, borderWidth:2
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},usePointStyle:true}}},scales:{y:{ticks:{callback:v=>fmt(v)}},x:{ticks:{font:{size:9}}}}}
+  });
+}
+
+function renderTableSales(sales) {
+  const ag={};
+  sales.forEach(r=>{ if(!ag[r.agent]) ag[r.agent]={ca:0,months:new Set()}; ag[r.agent].ca+=r.ca; ag[r.agent].months.add(r.month); });
+  const sorted=Object.entries(ag).sort((a,b)=>b[1].ca-a[1].ca);
+  document.getElementById('tb-sales-agents').innerHTML=sorted.map(([n,d],i)=>{
+    const months=d.months.size; const avg=d.ca/months;
+    const b=i===0?'badge-good':i<3?'badge-purple':'badge-warn';
+    return `<tr><td>${i+1}</td><td><strong>${n}</strong></td><td><span style="color:var(--accent2)">${fmtFull(d.ca)}</span></td><td>${months}</td><td>${fmtFull(avg)}</td><td><span class="badge ${b}">${i===0?'&#129351; Leader':i<3?'&#128994; Top':'&#128993; Actif'}</span></td></tr>`;
+  }).join('');
+}
+
+// &#9472;&#9472; PROVIDERS &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderProviders() {
+  const top8=PROVIDERS.slice(0,8);
+  dc('provCA'); charts['provCA']=new Chart(document.getElementById('ch-prov-ca'),{
+    type:'bar', data:{labels:top8.map(p=>p.name),datasets:[{data:top8.map(p=>p.ca),backgroundColor:PALETTE,borderRadius:4,label:'CA &#8364;'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
+  });
+  dc('provVol'); charts['provVol']=new Chart(document.getElementById('ch-prov-vol'),{
+    type:'bar', data:{labels:top8.map(p=>p.name),datasets:[{data:top8.map(p=>p.count),backgroundColor:PALETTE.map(c=>c.replace('0.8','0.6')),borderRadius:4,label:'Dossiers'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}
+  });
+  dc('provPanier'); charts['provPanier']=new Chart(document.getElementById('ch-prov-panier'),{
+    type:'bar', data:{labels:top8.map(p=>p.name),datasets:[{data:top8.map(p=>p.ca/p.count),backgroundColor:'rgba(247,201,72,0.7)',borderRadius:4,label:'Panier &#8364;'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
+  });
+  dc('provPie'); charts['provPie']=new Chart(document.getElementById('ch-prov-pie'),{
+    type:'doughnut', data:{labels:PROVIDERS.map(p=>p.name),datasets:[{data:PROVIDERS.map(p=>p.ca),backgroundColor:PALETTE,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}}}
+  });
+}
+
+function renderTableProviders() {
+  const total=PROVIDERS.reduce((s,p)=>s+p.ca,0);
+  document.getElementById('tb-providers').innerHTML=PROVIDERS.map((p,i)=>{
+    const panier=p.ca/p.count; const part=(p.ca/total*100).toFixed(1);
+    const b=i<2?'badge-good':i<5?'badge-purple':'badge-warn';
+    const perf=i===0?'&#129351; Leader':i<3?'&#128994; Fort':i<6?'&#128993; Moyen':'&#9898; Niche';
+    return `<tr><td><strong>${p.name}</strong></td><td>${fmtFull(p.ca)}</td><td>${p.count}</td><td>${fmtFull(panier)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div style="background:var(--border);border-radius:3px;height:5px;width:70px;overflow:hidden">
+          <div style="height:5px;border-radius:3px;background:var(--accent);width:${Math.min(p.ca/total*100*3,100)}%"></div>
+        </div>${part}%</div></td>
+      <td style="font-size:11px;color:var(--muted)">${(p.agents||[]).slice(0,3).join(', ')}</td>
+      <td><span class="badge ${b}">${perf}</span></td></tr>`;
+  }).join('');
+}
+
+// &#9472;&#9472; PRESTATAIRES &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderPrestas() {
+  const top10=PRESTAS.slice(0,10);
+  const colors=top10.map(p=>{ const mp=p.cost>0?(p.ca-p.cost)/p.ca*100:0; return mp>=30?'rgba(62,207,142,0.7)':mp>=22?'rgba(247,201,72,0.7)':'rgba(255,77,109,0.7)'; });
+  dc('prestaVol'); charts['prestaVol']=new Chart(document.getElementById('ch-presta-vol'),{
+    type:'bar', data:{labels:top10.map(p=>p.name),datasets:[{data:top10.map(p=>p.count),backgroundColor:'rgba(124,92,252,0.7)',borderRadius:4,label:'Chantiers'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}
+  });
+  dc('prestaMarge'); charts['prestaMarge']=new Chart(document.getElementById('ch-presta-marge'),{
+    type:'bar', data:{labels:top10.map(p=>p.name),datasets:[{data:top10.map(p=>p.cost>0?((p.ca-p.cost)/p.ca*100).toFixed(1):0),backgroundColor:colors,borderRadius:4,label:'Marge %'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+function renderTablePrestas() {
+  document.getElementById('tb-prestas').innerHTML=PRESTAS.map(p=>{
+    const marge=p.ca-p.cost; const mp=p.cost>0?marge/p.ca*100:0;
+    const b=mp>=30?'badge-good':mp>=22?'badge-warn':'badge-bad';
+    const perf=mp>=30?'&#128994; Excellent':mp>=22?'&#128993; Correct':'&#128308; Sous cible';
+    return `<tr><td><strong>${p.name}</strong></td><td>${p.count}</td><td>${fmtFull(p.ca)}</td><td>${fmtFull(p.cost)}</td><td>${fmtFull(marge)}</td><td><span class="badge ${b}">${mp.toFixed(1)}%</span></td><td>${p.count>0?fmtFull(p.cost/p.count):'&#8212;'}</td><td>${perf}</td></tr>`;
+  }).join('');
+}
+
+// &#9472;&#9472; ANNULATIONS &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderAnnulations() {
+  const tS=ANN_SALES.reduce((s,a)=>s+a.ca,0);
+  const tO=ANN_OPS.reduce((s,a)=>s+a.ca,0);
+  const tAll=tS+tO;
+  const totalSalesCA=SALES_MONTHS.reduce((s,m)=>s+Object.values(SALES_MONTHLY[m]||{}).reduce((ss,v)=>ss+v,0),0);
+  document.getElementById('ann-sales-total').textContent=fmt(tS);
+  document.getElementById('ann-sales-count').textContent=ANN_SALES.length+' dossiers';
+  document.getElementById('ann-ops-total').textContent=fmt(tO);
+  document.getElementById('ann-ops-count').textContent=ANN_OPS.length+' dossiers';
+  document.getElementById('ann-total').textContent=fmt(tAll);
+  document.getElementById('ann-rate').textContent=totalSalesCA>0?(tS/totalSalesCA*100).toFixed(1)+'%':'&#8212;';
+
+  document.getElementById('ann-sales-list').innerHTML=ANN_SALES.map(a=>
+    `<div class="ann-row"><div><strong>${a.client}</strong><div class="ann-meta">${a.month}${a.provider&&a.provider!=='Autre'?' &#183; '+a.provider:''}${a.agent?' &#183; '+a.agent:''}</div></div><div class="ann-ca">${fmt(a.ca)}</div></div>`
+  ).join('') || '<p style="color:var(--muted);font-size:13px">Aucune annulation d&#233;tect&#233;e.</p>';
+
+  document.getElementById('ann-ops-list').innerHTML=ANN_OPS.map(a=>
+    `<div class="ann-row"><div><strong>${a.client}</strong><div class="ann-meta">${a.month}${a.agent?' &#183; '+a.agent:''}</div></div><div class="ann-ca" style="color:var(--accent2)">${fmt(a.ca)}</div></div>`
+  ).join('') || '<p style="color:var(--muted);font-size:13px">Aucune annulation OPS d&#233;tect&#233;e.</p>';
+
+  // Graphe par provider
+  const provAnn={};
+  ANN_SALES.forEach(a=>provAnn[a.provider||'Autre']=(provAnn[a.provider||'Autre']||0)+a.ca);
+  const entries=Object.entries(provAnn).sort((a,b)=>b[1]-a[1]);
+  dc('annProv'); charts['annProv']=new Chart(document.getElementById('ch-ann-prov'),{
+    type:'bar', data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),backgroundColor:'rgba(255,77,109,0.7)',borderRadius:4,label:'CA Perdu'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}
+  });
+
+  // Analyse
+  const topAnn=ANN_SALES.length>0?ANN_SALES[0]:null;
+  const dupClients={};
+  ANN_SALES.forEach(a=>dupClients[a.client]=(dupClients[a.client]||0)+1);
+  const dups=Object.entries(dupClients).filter(([,n])=>n>1);
+  document.getElementById('ann-analysis').innerHTML=`
+    <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:14px;color:var(--danger)">&#128269; Analyse des annulations</div>
+    ${topAnn?`<div class="alert-item"><div class="alert-icon">&#128204;</div><div class="alert-text"><strong>Dossier le plus impactant</strong><span>${topAnn.client} &#8212; ${fmt(topAnn.ca)} (${topAnn.month}, ${topAnn.provider||'?'})</span></div></div>`:''}
+    ${dups.length>0?`<div class="alert-item"><div class="alert-icon">&#128260;</div><div class="alert-text"><strong>Client(s) annul&#233;(s) plusieurs fois</strong><span>${dups.map(([c,n])=>c+' (&#215;'+n+')').join(', ')} &#8212; &#192; investiguer : probl&#232;me prestataire r&#233;current ou client difficile ?</span></div></div>`:''}
+    <div class="alert-item"><div class="alert-icon">&#128161;</div><div class="alert-text"><strong>Taux global &#8212; Surveiller l'&#233;volution mensuelle</strong><span>Mettre en place un suivi mensuel des annulations pour d&#233;tecter les pics et identifier les causes (prestataire, d&#233;lai, qualification).</span></div></div>`;
+}
+
+// &#9472;&#9472; ALERTES &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+function renderAlertes(ops,sales) {
+  const agents={};
+  ops.forEach(r=>{ if(!agents[r.agent]) agents[r.agent]={ca:0,marge:0,n:0};
+    agents[r.agent].ca+=r.ca; agents[r.agent].marge+=r.marge; agents[r.agent].n++; });
+  const low=Object.entries(agents).map(([n,d])=>{return{name:n,mp:d.ca>0?d.marge/d.ca*100:0,ca:d.ca,n:d.n};}).filter(a=>a.mp<25&&a.ca>3000).sort((a,b)=>a.mp-b.mp);
+  const top=Object.entries(agents).map(([n,d])=>{return{name:n,mp:d.ca>0?d.marge/d.ca*100:0,ca:d.ca,n:d.n};}).filter(a=>a.mp>=30).sort((a,b)=>b.mp-a.mp);
+  const topProv=PROVIDERS[0];
+  const lowPresta=PRESTAS.filter(p=>p.cost>0&&(p.ca-p.cost)/p.ca*100<22&&p.count>=3);
+  document.getElementById('alertes-container').innerHTML=`
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="alert-box" style="background:rgba(255,77,109,0.08);border-color:rgba(255,77,109,0.3)">
+      <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:14px;color:var(--danger)">&#9888;&#65039; Agents OPS sous cible</div>
+      ${low.length===0?'<p style="color:var(--muted);font-size:13px">&#9989; Aucun agent sous le seuil de 25%.</p>':low.map(a=>`<div class="alert-item"><div class="alert-icon">&#128308;</div><div class="alert-text"><strong>${a.name}</strong><span>Marge <b style="color:var(--danger)">${a.mp.toFixed(1)}%</b> &#183; CA ${fmt(a.ca)}</span></div></div>`).join('')}
+    </div>
+    <div class="alert-box" style="background:rgba(62,207,142,0.06);border-color:rgba(62,207,142,0.3)">
+      <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:14px;color:var(--accent3)">&#9989; Top Performers OPS</div>
+      ${top.length===0?'<p style="color:var(--muted);font-size:13px">Filtrez sur plus de p&#233;riodes.</p>':top.map(a=>`<div class="alert-item"><div class="alert-icon">&#127775;</div><div class="alert-text"><strong>${a.name}</strong><span>Marge <b style="color:var(--accent3)">${a.mp.toFixed(1)}%</b> &#183; CA ${fmt(a.ca)}</span></div></div>`).join('')}
+    </div>
+  </div>
+  <div class="alert-box" style="background:rgba(124,92,252,0.06);border-color:rgba(124,92,252,0.3)">
+    <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:14px;color:var(--accent)">&#128203; Synth&#232;se Strat&#233;gique</div>
+    ${topProv?`<div class="alert-item"><div class="alert-icon">&#128230;</div><div class="alert-text"><strong>Provider dominant : ${topProv.name}</strong><span>${fmtFull(topProv.ca)} &#183; ${topProv.count} dossiers &#8212; D&#233;pendance forte, surveiller les annulations issues de cette source.</span></div></div>`:''}
+    ${lowPresta.length>0?`<div class="alert-item"><div class="alert-icon">&#128295;</div><div class="alert-text"><strong>Prestataires &#224; ren&#233;gocier</strong><span>${lowPresta.map(p=>p.name+' ('+((p.ca-p.cost)/p.ca*100).toFixed(1)+'%)').join(', ')} &#8212; Taux de marge sous le seuil de 22%.</span></div></div>`:''}
+    <div class="alert-item"><div class="alert-icon">&#129529;</div><div class="alert-text"><strong>Segment D&#233;barras &#8212; Le plus rentable</strong><span>Marges structurellement plus &#233;lev&#233;es que le d&#233;m&#233;nagement. D&#233;velopper ce segment est une priorit&#233;.</span></div></div>
+    <div class="alert-item"><div class="alert-icon">&#128197;</div><div class="alert-text"><strong>Saisonnalit&#233; Q2 &#8212; Pr&#233;parer les capacit&#233;s</strong><span>Mai-Juin repr&#233;sentent le pic historique. Anticiper les prestataires d&#232;s mars.</span></div></div>
+  </div>`;
+}
+
+
+
+function renderSegments() {
+  const km = KPI_MONTHS.filter(m => KPI_GLOBAL[m]);
+  if(!km.length) return;
+
+  const demCA    = km.map(m => KPI_GLOBAL[m].ca_dem   || 0);
+  const debCA    = km.map(m => KPI_GLOBAL[m].ca_deb   || 0);
+  const demMarge = km.map(m => KPI_GLOBAL[m].marge_dem || 0);
+  const debMarge = km.map(m => KPI_GLOBAL[m].marge_deb || 0);
+  const ns       = km.map(m => KPI_GLOBAL[m].n        || 0);
+
+  const totDemCA    = demCA.reduce((s,v)=>s+v,0);
+  const totDebCA    = debCA.reduce((s,v)=>s+v,0);
+  const totDemMarge = demMarge.reduce((s,v)=>s+v,0);
+  const totDebMarge = debMarge.reduce((s,v)=>s+v,0);
+  const totN        = ns.reduce((s,v)=>s+v,0);
+  const totCA       = totDemCA + totDebCA;
+  const totMarge    = totDemMarge + totDebMarge;
+  const mpDem       = totDemCA>0 ? totDemMarge/totDemCA*100 : 0;
+  const mpDeb       = totDebCA>0 ? totDebMarge/totDebCA*100 : 0;
+  const mpGlob      = totCA>0    ? totMarge/totCA*100 : 0;
+  const shareDem    = totCA>0 ? totDemCA/totCA*100 : 0;
+  const shareDeb    = totCA>0 ? totDebCA/totCA*100 : 0;
+
+  // KPI cards
+  document.getElementById('seg-kpis').innerHTML = [
+    {l:'CA D&#233;m&#233;nagement',       v:fmt(totDemCA),   sub:'Part : '+shareDem.toFixed(0)+'%',  c:'var(--accent)'},
+    {l:'CA D&#233;barras & M&#233;nage',  v:fmt(totDebCA),   sub:'Part : '+shareDeb.toFixed(0)+'%',  c:'var(--accent3)'},
+    {l:'Marge % D&#233;m&#233;nagement',  v:mpDem.toFixed(1)+'%', sub:fmt(totDemMarge)+' de marge',   c:'var(--accent)'},
+    {l:'Marge % D&#233;barras',      v:mpDeb.toFixed(1)+'%', sub:fmt(totDebMarge)+' de marge',   c:'var(--accent3)'},
+    {l:'&#201;cart de marge (pts)',   v:'+'+(mpDeb-mpDem).toFixed(1)+'pts', sub:'D&#233;barras plus rentable', c:'var(--accent2)'},
+    {l:'Total chantiers',        v:totN,             sub:km.length+' mois de donn&#233;es',       c:'var(--muted)'},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-value" style="color:${k.c}">${k.v}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+
+  // Chart 1 &#8212; CA mensuel stacked
+  const ctx1 = document.getElementById('segCaChart').getContext('2d');
+  if(window._segCaChart) window._segCaChart.destroy();
+  window._segCaChart = new Chart(ctx1, {
+    type:'bar',
+    data:{
+      labels:km,
+      datasets:[
+        {label:'D&#233;m&#233;nagement', data:demCA, backgroundColor:'rgba(124,92,252,0.75)', borderRadius:3},
+        {label:'D&#233;barras & M&#233;nage', data:debCA, backgroundColor:'rgba(62,207,142,0.75)', borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, plugins:{legend:{labels:{color:'#aaa'}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+' : '+fmt(ctx.raw)}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{stacked:true,ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }
+  });
+
+  // Chart 2 &#8212; Marge mensuelle stacked
+  const ctx2 = document.getElementById('segMargeChart').getContext('2d');
+  if(window._segMargeChart) window._segMargeChart.destroy();
+  window._segMargeChart = new Chart(ctx2, {
+    type:'bar',
+    data:{
+      labels:km,
+      datasets:[
+        {label:'Marge D&#233;m&#233;nagement', data:demMarge, backgroundColor:'rgba(124,92,252,0.75)', borderRadius:3},
+        {label:'Marge D&#233;barras & M&#233;nage', data:debMarge, backgroundColor:'rgba(62,207,142,0.75)', borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, plugins:{legend:{labels:{color:'#aaa'}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+' : '+fmt(ctx.raw)}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{stacked:true,ticks:{color:'#888',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }
+  });
+
+  // Chart 3 &#8212; Donut CA r&#233;partition
+  const ctx3 = document.getElementById('segDonutChart').getContext('2d');
+  if(window._segDonutChart) window._segDonutChart.destroy();
+  window._segDonutChart = new Chart(ctx3, {
+    type:'doughnut',
+    data:{
+      labels:['D&#233;m&#233;nagement','D&#233;barras & M&#233;nage'],
+      datasets:[{data:[totDemCA,totDebCA],backgroundColor:['rgba(124,92,252,0.85)','rgba(62,207,142,0.85)'],borderWidth:0}]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{labels:{color:'#aaa'}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+' : '+fmt(ctx.raw)+' ('+ctx.parsed.toFixed(0)+'%)'}},
+      }
+    }
+  });
+
+  // Chart 4 &#8212; Marge % par mois compar&#233;e (line)
+  const mpDemLine = km.map((m,i)=> demCA[i]>0 ? demMarge[i]/demCA[i]*100 : null);
+  const mpDebLine = km.map((m,i)=> debCA[i]>0 ? debMarge[i]/debCA[i]*100 : null);
+  const ctx4 = document.getElementById('segMargePctChart').getContext('2d');
+  if(window._segMargePctChart) window._segMargePctChart.destroy();
+  window._segMargePctChart = new Chart(ctx4, {
+    type:'line',
+    data:{
+      labels:km,
+      datasets:[
+        {label:'Marge % D&#233;m&#233;nagement', data:mpDemLine, borderColor:'rgba(124,92,252,1)', backgroundColor:'rgba(124,92,252,0.1)', tension:0.3, fill:true, pointRadius:3},
+        {label:'Marge % D&#233;barras', data:mpDebLine, borderColor:'rgba(62,207,142,1)', backgroundColor:'rgba(62,207,142,0.1)', tension:0.3, fill:true, pointRadius:3},
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:'#aaa'}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+' : '+(ctx.raw||0).toFixed(1)+'%'}}},
+      scales:{
+        x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{ticks:{color:'#888',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'},suggestedMin:0,suggestedMax:60}
+      }
+    }
+  });
+
+  // Table d&#233;taill&#233;e
+  const tbl = document.getElementById('seg-table');
+  tbl.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Mois</th>
+        <th>CA D&#233;m&#233;nagement</th><th>Marge DEM</th><th>Marge % DEM</th>
+        <th>CA D&#233;barras</th><th>Marge DEB</th><th>Marge % DEB</th>
+        <th>CA Global</th><th>Marge Global</th><th>Marge %</th><th>N</th>
+      </tr></thead>
+      <tbody>
+        ${km.map((m,i)=>{
+          const cd=demCA[i], md=demMarge[i], cb=debCA[i], mb=debMarge[i];
+          const cg=cd+cb, mg=md+mb;
+          const pd=cd>0?md/cd*100:0, pb=cb>0?mb/cb*100:0, pg=cg>0?mg/cg*100:0;
+          return `<tr>
+            <td><strong>${m}</strong></td>
+            <td>${fmt(cd)}</td><td>${fmt(md)}</td>
+            <td><span class="badge ${pd>=25?'badge-good':pd>=20?'badge-warn':'badge-bad'}">${pd.toFixed(1)}%</span></td>
+            <td>${fmt(cb)}</td><td>${fmt(mb)}</td>
+            <td><span class="badge ${pb>=40?'badge-good':pb>=25?'badge-warn':'badge-bad'}">${pb.toFixed(1)}%</span></td>
+            <td>${fmt(cg)}</td><td>${fmt(mg)}</td>
+            <td><span class="badge ${pg>=30?'badge-good':pg>=22?'badge-warn':'badge-bad'}">${pg.toFixed(1)}%</span></td>
+            <td>${KPI_GLOBAL[m].n}</td>
+          </tr>`;
+        }).join('')}
+        <tr style="font-weight:800;background:rgba(255,255,255,0.04)">
+          <td>TOTAL</td>
+          <td>${fmt(totDemCA)}</td><td>${fmt(totDemMarge)}</td>
+          <td><span class="badge badge-good">${mpDem.toFixed(1)}%</span></td>
+          <td>${fmt(totDebCA)}</td><td>${fmt(totDebMarge)}</td>
+          <td><span class="badge badge-good">${mpDeb.toFixed(1)}%</span></td>
+          <td>${fmt(totCA)}</td><td>${fmt(totMarge)}</td>
+          <td><span class="badge badge-good">${mpGlob.toFixed(1)}%</span></td>
+          <td>${totN}</td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+function renderMcKinsey(ops, sales) {
+  const ag = {};
+  ops.forEach(r => {
+    if(!ag[r.agent]) ag[r.agent]={ca:0,marge:0,n:0};
+    ag[r.agent].ca+=r.ca; ag[r.agent].marge+=r.marge; ag[r.agent].n++;
+  });
+  const tCA = ops.reduce((s,r)=>s+r.ca,0);
+  const tM  = ops.reduce((s,r)=>s+r.marge,0);
+  const tS  = sales.reduce((s,r)=>s+r.ca,0);
+  const tA  = ANN_SALES.reduce((s,a)=>s+a.ca,0)+ANN_OPS.reduce((s,a)=>s+a.ca,0);
+  const mp  = tCA>0?tM/tCA*100:0;
+  const totProv = PROVIDERS.reduce((s,p)=>s+p.ca,0);
+  const top1s = totProv>0?PROVIDERS[0].ca/totProv*100:0;
+  const top2s = totProv>0?PROVIDERS.slice(0,2).reduce((s,p)=>s+p.ca,0)/totProv*100:0;
+  const lowP  = PRESTAS.filter(p=>p.cost>0&&(p.ca-p.cost)/p.ca*100<25&&p.count>=5);
+  const agArr = Object.entries(ag).map(([n,d])=>({name:n,mp:d.ca>0?d.marge/d.ca*100:0,ca:d.ca,n:d.n}));
+  const mCa={}; OPS_MONTHS.forEach(m=>{mCa[m]=ops.filter(r=>r.month===m).reduce((s,r)=>s+r.ca,0);});
+  const mm=OPS_MONTHS.filter(x=>mCa[x]>0);
+  const lM=mm[mm.length-1]; const pM=mm[mm.length-2];
+  const trend=pM&&lM&&mCa[pM]>0?(mCa[lM]-mCa[pM])/mCa[pM]*100:0;
+  const annR=tS>0?ANN_SALES.reduce((s,a)=>s+a.ca,0)/tS*100:0;
+
+  const ksis=[
+    {l:'Marge OPS globale',v:mp.toFixed(1)+'%',t:'>32%',ok:mp>=32},
+    {l:'Taux annulation Sales',v:annR.toFixed(1)+'%',t:'<3%',ok:annR<3},
+    {l:'Concentration provider #1',v:top1s.toFixed(0)+'%',t:'<35%',ok:top1s<35},
+    {l:'Tendance CA OPS vs M-1',v:(trend>=0?'+':'')+trend.toFixed(1)+'%',t:'>0%',ok:trend>=0},
+  ];
+
+  const Q=[
+    {t:'&#128994; AGIR MAINTENANT',bg:'rgba(62,207,142,0.08)',b:'rgba(62,207,142,0.3)',items:[
+      mp<32?'Ren&#233;gocier les prestas &#224; faible marge &#8212; Chaque +1pt = '+fmt(tCA*0.01)+' de marge suppl&#233;mentaire':'',
+      lowP.length>0?'Prestas sous-performants : '+lowP.map(p=>p.name).join(', ')+' &#8212; en dessous de 25%':'',
+      top2s>55?'Diversifier les sources &#8212; Top 2 providers = '+top2s.toFixed(0)+'% du CA Sales. Risque de concentration':'',
+      annR>3?'R&#233;duire taux annulation ('+annR.toFixed(1)+'%) &#8212; '+fmt(tA)+' perdus depuis origine':'',
+    ].filter(Boolean)},
+    {t:'&#128995; PLANIFIER',bg:'rgba(124,92,252,0.08)',b:'rgba(124,92,252,0.3)',items:[
+      'D&#233;velopper le segment D&#233;barras &#8212; Marge structurellement +8-10pts vs D&#233;m&#233;nagement',
+      'Pr&#233;parer Q2 2026 : s&#233;curiser prestataires d&#232;s Mars pour pic Mai-Juin',
+      'Activer LAD, Maison D&#233;barras, Bon D&#233;barras &#8212; moins de 2% du CA actuellement',
+    ]},
+    {t:'&#128993; SURVEILLER',bg:'rgba(247,201,72,0.08)',b:'rgba(247,201,72,0.3)',items:[
+      'Mont&#233;e en comp&#233;tence AMENI (OPS depuis Jan 26) &#8212; suivre ratio chantiers/marge',
+      'Performance mensuelle Nadia & Molka &#8212; agents Sales en croissance rapide',
+      '&#201;volution CA par provider Matchmove ADS vs SEO &#8212; optimiser allocation budget',
+    ]},
+    {t:'&#128308; RISQUES &#192; ANTICIPER',bg:'rgba(255,77,109,0.06)',b:'rgba(255,77,109,0.25)',items:[
+      'D&#233;pendance Officiel du D&#233;m. ('+top1s.toFixed(0)+'% CA) &#8212; risque si partenariat rompu',
+      'MEHDI + IMED = 77% CA OPS &#8212; former AMENI comme rel&#232;ve op&#233;rationnelle',
+      'Pic annulations Mai 2025 (10 dossiers) &#8212; risque r&#233;cidive sans process de qualification',
+    ]},
+  ];
+
+  const bcgCols=[
+    {share:'>20%',panier:'>1000&#8364;',label:'&#11088; Vache &#224; lait',c:'rgba(62,207,142,0.12)'},
+    {share:'8-20%',panier:'>1000&#8364;',label:'&#128640; &#201;toile montante',c:'rgba(124,92,252,0.12)'},
+    {share:'<8%',panier:'>1200&#8364;',label:'&#10067; &#192; d&#233;velopper',c:'rgba(247,201,72,0.12)'},
+    {share:'<8%',panier:'<1000&#8364;',label:'&#128021; Faible potentiel',c:'rgba(255,77,109,0.08)'},
+  ];
+
+  const plans=[
+    {p:'J+30 &#8212; Mars 2026',c:'rgba(255,77,109,0.1)',b:'rgba(255,77,109,0.3)',items:[
+      'Audit annulations Mai 2025 &#8212; identifier cause racine (presta ou qualification)',
+      'Ren&#233;gocier prestas < 25% marge &#8212; objectif +2pts minimum',
+      'Fixer objectif mensuel AMENI : 10 chantiers, marge > 28%',
+    ]},
+    {p:'J+60 &#8212; Avril 2026',c:'rgba(247,201,72,0.08)',b:'rgba(247,201,72,0.3)',items:[
+      'Activer 2 nouveaux providers alternatifs (LAD, Maison D&#233;barras)',
+      'Briefer agents Sales sur qualification stricte avant prise de commande',
+      'Bilan Q1 2026 vs objectif annuel &#8212; ajuster si n&#233;cessaire',
+    ]},
+    {p:'J+90 &#8212; Mai 2026',c:'rgba(62,207,142,0.06)',b:'rgba(62,207,142,0.3)',items:[
+      'Capacit&#233; prestataires confirm&#233;e pour pic Q2 (Mai-Juin)',
+      'Marge OPS > 32% atteinte (vs 30.8% actuellement)',
+      "Dashboard utilis&#233; par toute l&#39;&#233;quipe comme outil de pilotage",
+    ]},
+  ];
+
+  const risks=[
+    ['Perte provider Officiel du D&#233;m. ('+top1s.toFixed(0)+'%)','Faible','Critique','D&#233;velopper 3 providers alternatifs > 10% chacun'],
+    ['Pic Q2 sans capacit&#233; prestataire','Moyenne','&#201;lev&#233;','Confirmer engagements de volume en Mars'],
+    ['Annulations > 5% sans am&#233;lioration qualification','Moyenne','Moyen','Grille de qualification + formation agents Sales'],
+    ['D&#233;part agent OPS cl&#233; (MEHDI/IMED = 77% CA)','Faible','Critique','Former AMENI, documenter process'],
+    ['Compression marges par pression concurrentielle','Moyenne','Moyen','Segmenter offre premium vs standard'],
+  ];
+
+  const c=document.getElementById('mckinsey-container');
+  c.innerHTML=
+    '<div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:6px">Framework d&#39;aide &#224; la d&#233;cision</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:28px;letter-spacing:1px">Analyse structur&#233;e &#183; Priorit&#233;s d&#39;action &#183; Impact business estim&#233;</div>'+
+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">'+
+    '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:18px">&#128200; 1. Indicateurs Cl&#233;s de Performance</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">'+
+    ksis.map(k=>'<div style="background:var(--surface2);border-radius:10px;padding:16px;border:1px solid '+(k.ok?'rgba(62,207,142,0.3)':'rgba(255,77,109,0.3)')+'">'+
+      '<div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">'+k.l+'</div>'+
+      '<div style="font-family:var(--font-display);font-size:26px;font-weight:800;color:'+(k.ok?'var(--accent3)':'var(--danger)')+'">'+k.v+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px">Cible : '+k.t+' '+(k.ok?'&#9989;':'&#9888;&#65039;')+'</div></div>'
+    ).join('')+'</div></div>'+
+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">'+
+    '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:18px">&#128202; 2. Matrice Priorit&#233; / Impact</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'+
+    Q.map(q=>'<div style="background:'+q.bg+';border:1px solid '+q.b+';border-radius:10px;padding:18px">'+
+      '<div style="font-weight:700;font-size:13px;margin-bottom:12px">'+q.t+'</div>'+
+      (q.items.length===0?'<div style="font-size:12px;color:var(--muted)">&#9989; Aucune action requise sur ce quadrant</div>':
+      q.items.map(i=>'<div style="display:flex;gap:8px;margin-bottom:7px;font-size:12px"><span style="flex-shrink:0">&#8594;</span><span>'+i+'</span></div>').join(''))
+    +'</div>').join('')+'</div></div>'+
+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">'+
+    '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:18px">&#128450;&#65039; 3. Portefeuille Providers &#8212; Matrice BCG</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">'+
+    PROVIDERS.map((p,i)=>{
+      const sh=totProv>0?p.ca/totProv*100:0;
+      const pan=p.ca/Math.max(1,p.count);
+      let star,col;
+      if(sh>20&&pan>=1000){star='&#11088; Vache &#224; lait';col='rgba(62,207,142,0.12)';}
+      else if(sh>8&&pan>=1000){star='&#128640; &#201;toile montante';col='rgba(124,92,252,0.12)';}
+      else if(sh<=8&&pan>=1200){star='&#10067; &#192; d&#233;velopper';col='rgba(247,201,72,0.12)';}
+      else{star='&#128021; Faible potentiel';col='rgba(255,77,109,0.08)';}
+      return '<div style="background:'+col+';border:1px solid var(--border);border-radius:8px;padding:12px">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+        '<strong>'+p.name+'</strong><span style="font-size:11px">'+star+'</span></div>'+
+        '<div style="font-size:11px;color:var(--muted)">'+sh.toFixed(1)+'% du CA &#183; '+p.count+' dossiers &#183; Panier '+fmt(pan)+'</div></div>';
+    }).join('')+'</div></div>'+
+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">'+
+    '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:18px">&#128467;&#65039; 4. Plan d&#39;action &#8212; 90 jours</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">'+
+    plans.map(q=>'<div style="background:'+q.c+';border:1px solid '+q.b+';border-radius:10px;padding:16px">'+
+      '<div style="font-weight:700;font-size:13px;margin-bottom:12px">'+q.p+'</div>'+
+      q.items.map(i=>'<div style="display:flex;gap:8px;margin-bottom:8px;font-size:12px"><span>&#8594;</span><span>'+i+'</span></div>').join('')
+    +'</div>').join('')+'</div></div>'+
+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px">'+
+    '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:18px">&#9889; 5. Registre des risques</div>'+
+    '<table style="width:100%;border-collapse:collapse">'+
+    '<thead><tr>'+['Risque','Probabilit&#233;','Impact','Mitigation'].map(h=>
+      '<th style="text-align:left;padding:10px 14px;font-size:10px;letter-spacing:1.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);text-transform:uppercase">'+h+'</th>'
+    ).join('')+'</tr></thead><tbody>'+
+    risks.map(([r,p,imp,m])=>'<tr>'+
+      '<td style="padding:10px 14px;font-size:13px;border-bottom:1px solid rgba(42,42,61,0.4)">'+r+'</td>'+
+      '<td style="padding:10px 14px;border-bottom:1px solid rgba(42,42,61,0.4)"><span class="badge '+(p==='Faible'?'badge-good':'badge-warn')+'">'+p+'</span></td>'+
+      '<td style="padding:10px 14px;border-bottom:1px solid rgba(42,42,61,0.4)"><span class="badge '+(imp==='Critique'?'badge-bad':'badge-warn')+'">'+imp+'</span></td>'+
+      '<td style="padding:10px 14px;font-size:12px;color:var(--muted);border-bottom:1px solid rgba(42,42,61,0.4)">'+m+'</td>'+
+    '</tr>').join('')+'</tbody></table></div>';
+}
+
+function showTab(id,btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); btn.classList.add('active');
+}
+
+populateFilters();
+applyFilters();
+</script>
+</body>
+</html>
